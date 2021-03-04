@@ -1,10 +1,10 @@
 SET(PNAME "TDR")
-SET(PONAME "tdr")
-project(${PNAME})
+project(${PNAME} C)
 
 cmake_minimum_required(VERSION 2.6)
-OPTION(WITH_RE2C "选择此项让re2c重新生成读取正则表达式的代码, 请确认re2c已被正确安装， 并且在命令行输入re2c可以访问。" OFF)
-OPTION(WITH_BISON "选择此项让bison重新生成语法分析的代码, 请确认bison已被正确安装， 并且在命令行输入re2c可以访问。" OFF)
+
+set(LIBNAME tdr)
+set(EXECNAME tdrc)
 
 IF(WIN32)
 	SET(CMAKE_C_FLAGS_DEBUG "/Od /Z7 /W4 /MDd")
@@ -27,8 +27,14 @@ SET(CMAKE_MODULE_PATH "${${PNAME}_SOURCE_DIR}/cmake/Modules/;${CMAKE_MODULE_PATH
 set(DIR_HOME ${${PNAME}_SOURCE_DIR})
 set(BUILD_HOME ${${PNAME}_BINARY_DIR})
 
-set(INCLUDE  ${DIR_HOME}/include)
-set(SOURCE  ${DIR_HOME}/source)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/tutorial/cmake/Modules;${CMAKE_MODULE_PATH})
+find_package(MySQL REQUIRED)
+include_directories(${MYSQL_INCLUDE_DIR})
 
-add_subdirectory(source)
+
+add_subdirectory(tdr)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tdr)
+add_subdirectory(tdrc)
+
 install(DIRECTORY lua DESTINATION ".")
