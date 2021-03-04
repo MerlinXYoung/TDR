@@ -1,0 +1,13 @@
+/*
+	¶ÁÈ¡Êý¾Ý¿â
+*/
+
+import "common/common.tdr"
+
+struct user
+{
+	int32 id;
+	string<MAX_NAME_LENGTH> username;
+	double exp;
+	uint64	gold;
+};

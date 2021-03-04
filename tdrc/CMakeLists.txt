@@ -1,0 +1,74 @@
+set(GEN_PATH ${CMAKE_CURRENT_SOURCE_DIR}/gen)
+
+FILE(GLOB FILE_LIST *.h *.c)
+
+
+FILE(GLOB LANGUAGE_FILE_LIST language/*.h language/*.c)
+source_group("language" FILES ${LANGUAGE_FILE_LIST})
+
+if(WIN32)
+FILE(GLOB GETOPT_FILE_LIST getopt/*.h getopt/*.c)
+source_group("getopt" FILES ${GETOPT_FILE_LIST})
+SET(GETOPT_INCLUDE getopt)
+endif(WIN32)
+
+FILE(GLOB PARSE_FILE_LIST parse/*.h parse/*.c)
+source_group("parse" FILES ${PARSE_FILE_LIST})
+
+FILE(GLOB GENERATE_FILE_LIST generate/*.h generate/*.c)
+source_group("generate" FILES ${GENERATE_FILE_LIST})
+
+FILE(GLOB LUA_FILE_LIST lua/*.h lua/*.c)
+source_group("lua" FILES ${LUA_FILE_LIST})
+
+FILE(GLOB SCRIPT_FILE_LIST script/*.h script/*.c)
+source_group("script" FILES ${SCRIPT_FILE_LIST})
+
+FILE(GLOB FLEX_FILE *.re)
+FILE(GLOB BISON_FILE *.yy)
+
+set(RE2C_HEADER ${GEN_PATH}/scanner_l.h)
+set(RE2C_OUTPUTS ${GEN_PATH}/scanner_l.c)
+
+add_custom_command(OUTPUT ${RE2C_OUTPUTS} ${RE2C_HEADER}
+COMMAND mkdir -p ${GEN_PATH}
+COMMAND re2c -c -F -t${RE2C_HEADER} -o${RE2C_OUTPUTS} ${FLEX_FILE}
+DEPENDS ${FLEX_FILE} 
+)
+
+
+set(BISON_DEFINES_OUTPUTS ${GEN_PATH}/parser_y.h)
+set(BISON_OUTPUTS ${GEN_PATH}/parser_y.c)
+
+add_custom_command(OUTPUT ${BISON_DEFINES_OUTPUTS} ${BISON_OUTPUTS}
+	COMMAND mkdir -p ${GEN_PATH}
+	COMMAND bison -p${LIBNAME} -o${BISON_OUTPUTS} ${BISON_FILE}
+	COMMAND bison -p${LIBNAME} --defines=${BISON_DEFINES_OUTPUTS} ${BISON_FILE}
+	DEPENDS ${BISON_FILE}
+)
+
+
+INCLUDE_DIRECTORIES(
+	${INCLUDE}
+	${GETOPT_INCLUDE}
+	${GEN_PATH}
+	lua
+	.
+	)
+ADD_EXECUTABLE(${EXECNAME} ${FILE_LIST}  
+	${PROTOCOL_FILE_LIST} ${GETOPT_FILE_LIST} ${LANGUAGE_FILE_LIST} ${PARSE_FILE_LIST} 
+	${GENERATE_FILE_LIST}  ${RE2C_OUTPUTS}  
+	${BISON_OUTPUTS} ${LUA_FILE_LIST} ${SCRIPT_FILE_LIST}
+)
+target_link_libraries(${EXECNAME} ${LIBNAME})
+
+
+
+INSTALL(TARGETS ${EXECNAME} DESTINATION "bin")
+
+if(WIN32)
+	TARGET_LINK_LIBRARIES(${EXECNAME})
+else()
+	TARGET_LINK_LIBRARIES(${EXECNAME} -lm)
+endif(WIN32)
+

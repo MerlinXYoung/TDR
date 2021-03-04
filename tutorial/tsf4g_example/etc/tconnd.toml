@@ -1,0 +1,16 @@
+[tconnd_config]
+log_config="/usr/local/tconnd/etc/tconnd_log.xml"
+
+[[tconnd_config.instance_config.element]]
+level="e_low"
+ip="127.0.0.1"
+port=7001
+backlog=5
+epoll_size=65536
+
+[[tconnd_config.instance_config.element]]
+level="e_low"
+ip="127.0.0.1"
+port=7004
+backlog=5
+epoll_size=1024
